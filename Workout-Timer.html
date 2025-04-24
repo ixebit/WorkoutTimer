@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta name="GCD" content="YTk3ODQ3ZWZhN2I4NzZmMzBkNTEwYjJl8d873ffbf41cccd64bb2ff02da816c70"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Workout Timer">
+    <title>Workout Timer</title>
+    
+    <!-- App Icons -->
+    <link rel="apple-touch-icon" href="/api/placeholder/180/180">
+    
+    <style>
+    html,
+    body {
+        position: fixed;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        overscroll-behavior: none;
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+        -moz-tap-highlight-color: transparent;
+        tap-highlight-color: transparent;
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+        background-color: rgb(245, 245, 245);
+        margin: 0px;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .container {
+        background-color: white;
+        border-radius: 20px;
+        border: 6px solid rgb(76, 175, 80);
+        padding: 20px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 20px;
+        margin-right: 20px;
+        margin-bottom: 20px;
+        margin-left: 20px;
+        margin-top: max(20px, env(safe-area-inset-top));
+        transition: border-color 0.5s ease;
+    }
+    .title {
+        text-align: center;
+        color: rgb(51, 51, 51);
+        font-size: 28px;
+        font-weight: bold;
+        margin: 10px 0px 20px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .time {
+        text-align: center;
+        font-size: 72px;
+        font-weight: 300;
+        color: rgb(33, 150, 243);
+        margin: 20px 0px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    .phase {
+        text-align: center;
+        font-size: 32px;
+        font-weight: bold;
+        color: rgb(76, 175, 80);
+        margin: 10px 0px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    .phase-time {
+        text-align: center;
+        font-size: 18px;
+        color: rgb(102, 102, 102);
+        margin: 10px 0px 20px;
+    }
+    .progress-container {
+        margin: 20px;
+        position: relative;
+    }
+    .progress-bg {
+        background-color: rgb(248, 249, 250);
+        border: 1px solid rgb(224, 224, 224);
+        border-radius: 15px;
+        height: 30px;
+        width: 100%;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .progress-bar {
+        background-color: rgb(76, 175, 80);
+        border-radius: 15px;
+        height: 30px;
+        width: 0px;
+        transition: width 0.1s linear 0s, background-color 0.3s ease;
+        -webkit-transition: width 0.1s linear 0s, background-color 0.3s ease;
+        -moz-transition: width 0.1s linear 0s, background-color 0.3s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .phase-markers {
+        position: relative;
+        height: 70px;
+        margin-top: 10px;
+    }
+    .marker {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background-color: rgb(158, 158, 158);
+        border-radius: 50%;
+        transform: translateX(-50%);
+        -webkit-transform: translateX(-50%);
+        -moz-transform: translateX(-50%);
+    }
+    .marker-label {
+        position: absolute;
+        transform: translateX(-50%);
+        -webkit-transform: translateX(-50%);
+        -moz-transform: translateX(-50%);
+        top: 15px;
+        font-size: 12px;
+        color: rgb(102, 102, 102);
+        white-space: nowrap;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 2px 6px;
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .marker-label:nth-child(even) {
+        top: 40px;
+    }
+    .buttons {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .start-btn {
+        background-color: rgb(76, 175, 80);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 40px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 140px;
+        margin-bottom: 10px;
+        appearance: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+    }
+    .start-btn:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .reset-btn {
+        background-color: rgb(158, 158, 158);
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 8px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        width: 100px;
+        appearance: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+    }
+    .reset-btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    button {
+        min-height: 44px;
+        margin: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .time-input-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 15px 0;
+        background-color: rgba(240, 240, 240, 0.5);
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .time-input {
+        width: 100px;
+        font-size: 18px;
+        text-align: center;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        margin: 5px 0;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .time-input-label {
+        font-size: 16px;
+        color: #555;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    .apply-btn {
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 8px 20px;
+        font-size: 14px;
+        cursor: pointer;
+        width: 120px;
+        appearance: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+    }
+    .apply-btn:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <h1 class="title">Workout Timer</h1>
+        
+        <div class="time-input-container" id="timeInputContainer">
+            <label class="time-input-label">Gesamtzeit in Minuten:</label>
+            <input type="number" class="time-input" id="totalTimeInput" value="20" min="1" max="120">
+            <button class="apply-btn" id="applyTimeBtn">Übernehmen</button>
+        </div>
+        
+        <div class="time" id="timeDisplay">20:00</div>
+        <div class="phase" id="phaseDisplay">Bereit</div>
+        <div class="phase-time" id="phaseTimeDisplay"></div>
+        
+        <div class="progress-container">
+            <div class="progress-bg">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="phase-markers" id="phaseMarkers"></div>
+        </div>
+
+        <div class="buttons">
+            <button class="start-btn" id="startBtn">Start</button>
+            <button class="reset-btn" id="resetBtn">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // Verhindert das Doppeltippen zum Zoomen
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        });
+
+        // Verhindert das Überscrollen auf iOS
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        class WorkoutTimer {
+            constructor() {
+                this.defaultTotalMinutes = 20;
+                this.totalMinutes = this.defaultTotalMinutes;
+                
+                // Standardphasen-Verhältnisse für 20 Minuten
+                this.phaseRatios = [
+                    ['Laufen', 120/1200], // 120s / 1200s (20min)
+                    ['Joggen', 300/1200],
+                    ['Laufen', 120/1200],
+                    ['Joggen', 300/1200],
+                    ['Laufen', 120/1200],
+                    ['Joggen', 180/1200],
+                    ['Laufen', 60/1200]
+                ];
+                
+                this.phases = this.calculatePhases();
+                this.totalTime = this.calculateTotalTime();
+                this.currentTime = 0;
+                this.isRunning = false;
+                this.currentPhase = 0;
+                this.startTime = null;
+                this.timer = null;
+
+                this.timeDisplay = document.getElementById('timeDisplay');
+                this.phaseDisplay = document.getElementById('phaseDisplay');
+                this.phaseTimeDisplay = document.getElementById('phaseTimeDisplay');
+                this.progressBar = document.getElementById('progressBar');
+                this.startBtn = document.getElementById('startBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.totalTimeInput = document.getElementById('totalTimeInput');
+                this.applyTimeBtn = document.getElementById('applyTimeBtn');
+                this.mainContainer = document.getElementById('mainContainer');
+
+                // Farben für Phasen
+                this.runningColor = '#4CAF50'; // Grün
+                this.joggingColor = '#2196F3'; // Blau
+
+                // Aktiviere Wakelock wenn verfügbar
+                this.wakeLock = null;
+                if ('wakeLock' in navigator) {
+                    this.requestWakeLock();
+                }
+
+                this.setupMarkers();
+                this.setupButtons();
+                this.updateTimeDisplay();
+            }
+
+            calculatePhases() {
+                const totalSeconds = this.totalMinutes * 60;
+                return this.phaseRatios.map(phase => {
+                    const seconds = Math.round(phase[1] * totalSeconds);
+                    return [phase[0], seconds];
+                });
+            }
+
+            calculateTotalTime() {
+                return this.phases.reduce((sum, phase) => sum + phase[1], 0);
+            }
+
+            async requestWakeLock() {
+                try {
+                    this.wakeLock = await navigator.wakeLock.request('screen');
+                } catch (err) {
+                    console.log(`${err.name}, ${err.message}`);
+                }
+            }
+
+            setupMarkers() {
+                const markersContainer = document.getElementById('phaseMarkers');
+                markersContainer.innerHTML = ''; // Bestehende Marker löschen
+                
+                let accumulatedTime = 0;
+
+                this.phases.forEach((phase, index) => {
+                    if (index < this.phases.length - 1) {
+                        accumulatedTime += phase[1];
+                        const position = (accumulatedTime / this.totalTime) * 100;
+
+                        const marker = document.createElement('div');
+                        marker.className = 'marker';
+                        marker.style.left = `${position}%`;
+                        markersContainer.appendChild(marker);
+
+                        const label = document.createElement('div');
+                        label.className = 'marker-label';
+                        label.textContent = this.phases[index + 1][0];
+                        label.style.left = `${position}%`;
+                        // Alternierende Position für bessere Lesbarkeit
+                        markersContainer.appendChild(label);
+                    }
+                });
+            }
+
+            setupButtons() {
+                // Touch-Events für mobile Geräte
+                this.startBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.toggleTimer();
+                });
+                this.resetBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.resetTimer();
+                });
+                this.applyTimeBtn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.applyNewTime();
+                });
+                
+                // Auch Klick-Events für Desktop-Nutzung
+                this.startBtn.addEventListener('click', () => this.toggleTimer());
+                this.resetBtn.addEventListener('click', () => this.resetTimer());
+                this.applyTimeBtn.addEventListener('click', () => this.applyNewTime());
+            }
+            
+            applyNewTime() {
+                const newTime = parseInt(this.totalTimeInput.value);
+                if (newTime && newTime > 0 && newTime <= 120) {
+                    this.totalMinutes = newTime;
+                    this.phases = this.calculatePhases();
+                    this.totalTime = this.calculateTotalTime();
+                    this.resetTimer();
+                    this.setupMarkers();
+                } else {
+                    alert('Bitte gib eine gültige Zeit zwischen 1 und 120 Minuten ein.');
+                    this.totalTimeInput.value = this.totalMinutes;
+                }
+            }
+
+            toggleTimer() {
+                if (!this.isRunning) {
+                    this.isRunning = true;
+                    this.startTime = Date.now() - (this.currentTime * 1000);
+                    this.startBtn.textContent = 'Pause';
+                    this.startBtn.style.backgroundColor = '#f44336';
+                    this.updateTimer();
+                    // Wakelock aktivieren
+                    this.requestWakeLock();
+                } else {
+                    this.isRunning = false;
+                    this.startBtn.textContent = 'Weiter';
+                    this.startBtn.style.backgroundColor = '#4CAF50';
+                    // Wakelock freigeben
+                    if (this.wakeLock) {
+                        this.wakeLock.release();
+                        this.wakeLock = null;
+                    }
+                }
+            }
+
+            updateTimer() {
+                if (!this.isRunning) return;
+
+                this.currentTime = (Date.now() - this.startTime) / 1000;
+                
+                let timeSum = 0;
+                let phaseFound = false;
+
+                for (let i = 0; i < this.phases.length; i++) {
+                    timeSum += this.phases[i][1];
+                    if (this.currentTime <= timeSum && !phaseFound) {
+                        if (this.currentPhase !== i) {
+                            this.currentPhase = i;
+                            const isRunning = this.phases[i][0] === 'Laufen';
+                            const color = isRunning ? this.runningColor : this.joggingColor;
+                            
+                            // Farbe des Fortschrittsbalkens ändern
+                            this.progressBar.style.backgroundColor = color;
+                            
+                            // Farbe der Phasen-Anzeige ändern
+                            this.phaseDisplay.style.color = color;
+                            
+                            // Farbe des Rahmens ändern
+                            this.mainContainer.style.borderColor = color;
+                        }
+                        this.phaseDisplay.textContent = this.phases[i][0];
+                        
+                        const phaseTimeRemaining = timeSum - this.currentTime;
+                        const phaseMinutes = Math.floor(phaseTimeRemaining / 60);
+                        const phaseSeconds = Math.floor(phaseTimeRemaining % 60);
+                        this.phaseTimeDisplay.textContent = `Noch ${phaseMinutes}:${phaseSeconds.toString().padStart(2, '0')} min`;
+                        phaseFound = true;
+                    }
+                }
+
+                const remainingTime = this.totalTime - this.currentTime;
+                if (remainingTime <= 0) {
+                    this.isRunning = false;
+                    this.startBtn.textContent = 'Neustart';
+                    this.startBtn.style.backgroundColor = '#4CAF50';
+                    this.phaseDisplay.textContent = 'Fertig!';
+                    this.phaseTimeDisplay.textContent = 'Workout beendet!';
+                    this.mainContainer.style.borderColor = '#9C27B0'; // Lila für "Fertig"
+                    // Vibration wenn verfügbar
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate([200, 100, 200]);
+                    }
+                    return;
+                }
+
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = Math.floor(remainingTime % 60);
+                this.timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                const progress = (this.currentTime / this.totalTime) * 100;
+                this.progressBar.style.width = `${progress}%`;
+
+                if (this.isRunning) {
+                    requestAnimationFrame(() => this.updateTimer());
+                }
+            }
+
+            updateTimeDisplay() {
+                const minutes = Math.floor(this.totalTime / 60);
+                const seconds = Math.floor(this.totalTime % 60);
+                this.timeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            resetTimer() {
+                this.currentTime = 0;
+                this.isRunning = false;
+                this.currentPhase = 0;
+                this.startTime = null;
+                this.updateTimeDisplay();
+                this.phaseDisplay.textContent = 'Bereit';
+                this.phaseDisplay.style.color = this.runningColor;
+                this.mainContainer.style.borderColor = this.runningColor;
+                this.phaseTimeDisplay.textContent = '';
+                this.progressBar.style.width = '0';
+                this.progressBar.style.backgroundColor = this.runningColor;
+                this.startBtn.textContent = 'Start';
+                this.startBtn.style.backgroundColor = this.runningColor;
+                // Wakelock freigeben
+                if (this.wakeLock) {
+                    this.wakeLock.release();
+                    this.wakeLock = null;
+                }
+            }
+        }
+
+        // Timer initialisieren
+        window.addEventListener('DOMContentLoaded', () => {
+            new WorkoutTimer();
+        });
+    </script>
+</body>
+</html>
